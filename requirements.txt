@@ -1,0 +1,8 @@
+langchain
+openai
+streamlit
+tiktoken
+matplotlib
+plotly
+scipy
+scikit-learn
