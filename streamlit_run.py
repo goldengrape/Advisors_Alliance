@@ -4,8 +4,10 @@ from six_hats_GUI import init_sessions, set_settings,set_header,set_chatbox, dis
 init_sessions()
 
 # layout 
-settings = st.sidebar.container()
 header = st.container()
+# settings = st.sidebar.container()
+settings=st.expander("虎符相印")
+
 chat_box=st.container()
 st.markdown("---")
 history=st.container()

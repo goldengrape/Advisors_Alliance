@@ -16,7 +16,7 @@ def init_sessions():
     init_session_state("advisor_list",init_advisor())
 
 def set_settings(c):
-    openai_key = c.text_input("OpenAI API Key", value="", type="password")
+    openai_key = c.text_input("主公请输入虎符(OpenAI API Key)", value="", type="password")
     st.session_state["model"] = c.selectbox(
         "模型", options=["gpt-3.5-turbo", "gpt-4"], index=0)
     temp_options = {"严谨": 0.1, "平衡": 0.5, "创意": 0.9}
