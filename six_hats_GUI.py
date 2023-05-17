@@ -49,6 +49,7 @@ def set_header(c):
     for i, advisor in enumerate(st.session_state["advisor_list"]):
         # c.markdown(f'![image]({advisor["logo"]})')
         img_col[i].image(advisor["logo"],width=100)
+
         # img_col[i].latex(f'{advisor["name"]}')
         img_col[i].latex(f'{advisor["zi"]}')
         # img_col[i].markdown(f'* 个性{advisor["character"]}')
