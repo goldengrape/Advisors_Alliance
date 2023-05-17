@@ -45,8 +45,14 @@ def set_settings(c):
     
 def set_header(c):
     c.markdown("#### 军师联盟")
+    # img_col=c.columns(6)
+    # for i, advisor in enumerate(st.session_state["advisor_list"]):
+    #     # c.markdown(f'![image]({advisor["logo"]})')
+    #     img_col[i].image(advisor["logo"],width=100)
+    #     img_col[i].markdown(f'{advisor["name"]}')
 
-def get_advice(c):
+def get_advice(img_container,markdown_container):
+    img_size=100
     current_memory="\n".join([
         message.content.strip() for message in st.session_state["summary_chain"].memory.chat_memory.messages])
     st.session_state["summary_chain"].memory.chat_memory.add_user_message(st.session_state["human_input"])
@@ -63,7 +69,8 @@ def get_advice(c):
         )
         st.session_state["summary_chain"].memory.chat_memory.add_ai_message(res)
         st.session_state["history"].append(res)
-        c.markdown(f"{res}")
+        img_container.image(advisor["logo"],width=img_size)
+        markdown_container.markdown(f'{res}')
     advisor=st.session_state["advisor_list"][-1]
     res=st.session_state["summary_chain"].run(
         {"name":advisor["name"],
@@ -74,18 +81,21 @@ def get_advice(c):
         },
     )
     st.session_state["history"].append(res)
-    c.markdown(f"{res}")
+    img_container.image(advisor["logo"],width=img_size)
+    markdown_container.markdown(f"{res}")
     return
 
 def set_chatbox(c):
     human_input=c.text_area("主公请提问", value="")
     ask_button=c.button("提问")
-    current_advice=c.empty()
+    col1,col2=c.columns([1,6])
+    current_img=col1.empty()
+    current_advice=col2.empty()
     if human_input and ask_button and st.session_state["individual_chain"]:
         st.session_state["human_input"]=human_input
         # human_input,advisor_list,individual_chain,sum_chain
-        get_advice(current_advice)
-    current_advice=c.empty()
+        get_advice(current_img,current_advice)
+    # current_advice=c.empty()
 
 
 def display_history(c):
