@@ -1,5 +1,9 @@
 import streamlit as st 
-from six_hats_GUI import init_sessions, set_settings,set_header,set_chatbox, display_history
+from six_hats_GUI import (
+    init_session_state,
+    init_sessions, 
+    set_settings,
+    set_header,set_chatbox, display_history)
 
 init_sessions()
 
@@ -9,6 +13,7 @@ header = st.container()
 settings=st.expander("虎符相印")
 
 chat_box=st.container()
+
 st.markdown("---")
 history=st.container()
 

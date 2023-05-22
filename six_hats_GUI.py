@@ -1,7 +1,12 @@
 import streamlit as st 
-from six_hats_backend import init_chain, init_advisor
+from six_hats_backend import (
+    init_chain, init_advisor,
+    StreamHandler)
 import os 
 from langchain.chat_models import ChatOpenAI
+from langchain.callbacks.base import BaseCallbackHandler
+from langchain.schema import HumanMessage
+
 
 def init_session_state(key,value):
     if key not in st.session_state:
@@ -14,6 +19,8 @@ def init_sessions():
     init_session_state("human_input",None)
     init_session_state("history",[])
     init_session_state("advisor_list",init_advisor())
+    init_session_state("stream_box",st.empty())
+
 
 def set_settings(c):
     openai_key = c.text_input("主公请输入虎符(OpenAI API Key)", value="", type="password")
@@ -31,11 +38,16 @@ def set_settings(c):
     st.session_state["answer_length"] = answer_length
     st.session_state["temperature"] = temperature
     
+    stream_handler = StreamHandler(
+        st.session_state["stream_box"], display_method='markdown')
+
+
     if openai_key:
         os.environ["OPENAI_API_KEY"] = openai_key
         llm=ChatOpenAI(
             model_name=st.session_state["model"],
             temperature=st.session_state["temperature"],
+            streaming=True, callbacks=[stream_handler]
             )
         individual_chain, summary_chain=init_chain(llm)
         st.session_state["individual_chain"]=individual_chain
@@ -63,6 +75,7 @@ def get_advice(img_container,markdown_container):
     
     st.session_state["history"].append("主公说："+st.session_state["human_input"])
     for advisor in st.session_state["advisor_list"][:-1]:
+        img_container.image(advisor["logo"],width=img_size)
         res=st.session_state["individual_chain"].run(
             {"name":advisor["name"],
             "personality":advisor["personality"],
@@ -73,9 +86,9 @@ def get_advice(img_container,markdown_container):
         )
         st.session_state["summary_chain"].memory.chat_memory.add_ai_message(res)
         st.session_state["history"].append(res)
-        img_container.image(advisor["logo"],width=img_size)
         markdown_container.markdown(f'{res}')
     advisor=st.session_state["advisor_list"][-1]
+    img_container.image(advisor["logo"],width=img_size)
     res=st.session_state["summary_chain"].run(
         {"name":advisor["name"],
         "personality":advisor["personality"],
@@ -85,7 +98,6 @@ def get_advice(img_container,markdown_container):
         },
     )
     st.session_state["history"].append(res)
-    img_container.image(advisor["logo"],width=img_size)
     markdown_container.markdown(f"{res}")
     return
 
@@ -95,6 +107,7 @@ def set_chatbox(c):
     col1,col2=c.columns([1,6])
     current_img=col1.empty()
     current_advice=col2.empty()
+    st.session_state["stream_box"]=current_advice
     if human_input and ask_button and st.session_state["individual_chain"]:
         st.session_state["human_input"]=human_input
         # human_input,advisor_list,individual_chain,sum_chain
