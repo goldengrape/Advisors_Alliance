@@ -72,8 +72,8 @@ def get_advice(img_container,markdown_container):
     current_memory="\n".join([
         message.content.strip() for message in st.session_state["summary_chain"].memory.chat_memory.messages])
     st.session_state["summary_chain"].memory.chat_memory.add_user_message(st.session_state["human_input"])
-    
-    st.session_state["history"].append("主公说："+st.session_state["human_input"])
+    st.session_state["history"].append("----")
+    st.session_state["history"].append("**主公**说："+st.session_state["human_input"])
     for advisor in st.session_state["advisor_list"][:-1]:
         img_container.image(advisor["logo"],width=img_size)
         res=st.session_state["individual_chain"].run(
@@ -85,8 +85,9 @@ def get_advice(img_container,markdown_container):
             "length":st.session_state["answer_length"]}
         )
         st.session_state["summary_chain"].memory.chat_memory.add_ai_message(res)
-        st.session_state["history"].append(res)
+        st.session_state["history"].append(f"> {res}")
         markdown_container.markdown(f'{res}')
+
     advisor=st.session_state["advisor_list"][-1]
     img_container.image(advisor["logo"],width=img_size)
     res=st.session_state["summary_chain"].run(
