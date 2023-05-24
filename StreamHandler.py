@@ -24,9 +24,11 @@ class StreamDisplayHandler(BaseCallbackHandler):
 
 
 class StreamSpeakHandler(BaseCallbackHandler):
-    def __init__(self, synthesis="zh-CN-XiaoxiaoNeural"):
+    def __init__(self, synthesis="zh-CN-XiaoxiaoNeural", rate="+50.00%"):
         self.new_sentence = ""
         # Initialize the speech synthesizer
+        self.synthesis=synthesis
+        self.rate=rate
         self.speech_synthesizer = self.settings(synthesis)
 
     def settings(self, synthesis):
@@ -35,11 +37,7 @@ class StreamSpeakHandler(BaseCallbackHandler):
             region=os.environ.get('SPEECH_REGION')
         )
         audio_output_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
-        # audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
-
-        # speech_config.speech_recognition_language=recognition
-        # speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
-
+        
         speech_config.speech_synthesis_voice_name=synthesis
 
         speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_output_config)
@@ -51,13 +49,24 @@ class StreamSpeakHandler(BaseCallbackHandler):
         if token in ".:!?。：！？\n":
             # Synthesize the new sentence
             speak_this = self.new_sentence
-            self.speak_text_async(speak_this)
+
+            ssml_text=f"""<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" version="1.0" xml:lang="en-US">
+    <voice name="{self.synthesis}">
+    <prosody rate="{self.rate}">
+            {speak_this}
+    </prosody>
+    </voice>
+</speak>"""
+
+
+
+            self.speak_ssml_async(ssml_text)
             self.new_sentence = ""
 
     def on_llm_end(self, response, **kwargs) -> None:
         self.new_sentence = ""
 
-    def speak_text_async(self, text):
-        speech_synthesis_result = self.speech_synthesizer.speak_text_async(text).get()
+    def speak_ssml_async(self, text):
+        speech_synthesis_result = self.speech_synthesizer.speak_ssml_async(text).get()
         if speech_synthesis_result.reason != speechsdk.ResultReason.SynthesizingAudioCompleted:
             print(f'Error synthesizing speech: {speech_synthesis_result.reason}')
