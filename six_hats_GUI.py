@@ -1,11 +1,12 @@
 import streamlit as st 
 from six_hats_backend import (
     init_chain, init_advisor,
-    StreamHandler)
+    )
 import os 
 from langchain.chat_models import ChatOpenAI
-from langchain.callbacks.base import BaseCallbackHandler
+# from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import HumanMessage
+from StreamHandler import StreamDisplayHandler, StreamSpeakHandler
 
 
 def init_session_state(key,value):
@@ -38,16 +39,23 @@ def set_settings(c):
     st.session_state["answer_length"] = answer_length
     st.session_state["temperature"] = temperature
     
-    stream_handler = StreamHandler(
+    stream_display_handler = StreamDisplayHandler(
         st.session_state["stream_box"], display_method='markdown')
-
+    stream_speak_handler = StreamSpeakHandler(
+        recognition="zh-CN", synthesis="zh-CN-YunjianNeural",
+    )
+    speak_choose=c.selectbox("语音",options=["关闭","开启"],index=0)
+    if speak_choose=="开启":
+        stream_handler=[stream_display_handler,stream_speak_handler]
+    else:
+        stream_handler=[stream_display_handler]
 
     if openai_key:
         os.environ["OPENAI_API_KEY"] = openai_key
         llm=ChatOpenAI(
             model_name=st.session_state["model"],
             temperature=st.session_state["temperature"],
-            streaming=True, callbacks=[stream_handler]
+            streaming=True, callbacks=stream_handler
             )
         individual_chain, summary_chain=init_chain(llm)
         st.session_state["individual_chain"]=individual_chain

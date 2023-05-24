@@ -147,20 +147,22 @@ def get_advice(human_input,advisor_list,individual_chain,sum_chain):
     advice_list.append(res)
     return advice_list
 
-from langchain.callbacks.base import BaseCallbackHandler
-class StreamHandler(BaseCallbackHandler):
-    def __init__(self, container, initial_text="", display_method='markdown'):
-        self.container = container
-        self.text = initial_text
-        self.display_method = display_method
 
-    def on_llm_new_token(self, token: str, **kwargs) -> None:
-        self.text += token
-        display_function = getattr(self.container, self.display_method, None)
-        if display_function is not None:
-            display_function(self.text)
-        else:
-            raise ValueError(f"Invalid display_method: {self.display_method}")
-    def on_llm_end(self, response, **kwargs: Any) -> Any:
-        self.text=""
+
+# from langchain.callbacks.base import BaseCallbackHandler
+# class StreamHandler(BaseCallbackHandler):
+#     def __init__(self, container, initial_text="", display_method='markdown'):
+#         self.container = container
+#         self.text = initial_text
+#         self.display_method = display_method
+
+#     def on_llm_new_token(self, token: str, **kwargs) -> None:
+#         self.text += token
+#         display_function = getattr(self.container, self.display_method, None)
+#         if display_function is not None:
+#             display_function(self.text)
+#         else:
+#             raise ValueError(f"Invalid display_method: {self.display_method}")
+#     def on_llm_end(self, response, **kwargs: Any) -> Any:
+#         self.text=""
     
