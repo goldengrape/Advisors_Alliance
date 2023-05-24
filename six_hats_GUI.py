@@ -24,7 +24,17 @@ def init_sessions():
 
 
 def set_settings(c):
-    openai_key = c.text_input("主公请输入虎符(OpenAI API Key)", value="", type="password")
+    if st.secrets.get("openai_api_key"):
+        openai_key = st.secrets.get("openai_api_key")
+        speech_key=st.secrets.get("speech_key")
+        speech_region=st.secrets.get("speech_region")
+    else:
+        openai_key = c.text_input("主公请输入虎符(OpenAI API Key)", value="", type="password")
+        speech_key=c.text_input("主公请输入虎符(Azure Speech Key)", 
+                                value="",  type="password")
+        speech_region=c.text_input("主公请输入虎符(Azure Speech Region)", 
+                                value="westus", type="password")
+
     st.session_state["model"] = c.selectbox(
         "模型", options=["gpt-3.5-turbo", "gpt-4"], index=0)
     temp_options = {"严谨": 0.1, "平衡": 0.5, "创意": 0.9}
@@ -38,10 +48,6 @@ def set_settings(c):
 
     st.session_state["answer_length"] = answer_length
     st.session_state["temperature"] = temperature
-    speech_key=c.text_input("主公请输入虎符(Azure Speech Key)", 
-                            value="",  type="password")
-    speech_region=c.text_input("主公请输入虎符(Azure Speech Region)", 
-                               value="westus", type="password")
     speak_choose=c.selectbox("语音",options=["关闭","开启"],index=0)
 
     make_model_button = c.button("打造虎符")
@@ -58,7 +64,12 @@ def set_settings(c):
             st.session_state["stream_box"], display_method='markdown')
 
         if speak_choose=="开启" and len(speech_key)>0 and len(speech_region)>0:
-            stream_speak_handler = StreamSpeakHandler(synthesis="zh-CN-YunjianNeural",)
+            speak_box=c.empty()
+            stream_speak_handler = StreamSpeakHandler(
+                container=speak_box,
+                run_place=st.secrets.get("run_place", "cloud"),
+                synthesis="zh-CN-YunjianNeural",
+                rate="+50.00%")
 
             stream_handler=[stream_display_handler,stream_speak_handler]
         elif speak_choose=="开启":

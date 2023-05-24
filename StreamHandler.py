@@ -1,7 +1,8 @@
 from langchain.callbacks.base import BaseCallbackHandler
 import azure.cognitiveservices.speech as speechsdk
 import os
-
+import base64
+import time
 class StreamDisplayHandler(BaseCallbackHandler):
     def __init__(self, container, initial_text="", display_method='markdown'):
         self.container = container
@@ -24,7 +25,13 @@ class StreamDisplayHandler(BaseCallbackHandler):
 
 
 class StreamSpeakHandler(BaseCallbackHandler):
-    def __init__(self, synthesis="zh-CN-XiaoxiaoNeural", rate="+50.00%"):
+    def __init__(self, 
+        container,
+        run_place="cloud",
+        synthesis="zh-CN-XiaoxiaoNeural", 
+        rate="+50.00%"):
+        self.container = container
+        self.run_place=run_place
         self.new_sentence = ""
         # Initialize the speech synthesizer
         self.synthesis=synthesis
@@ -59,8 +66,10 @@ class StreamSpeakHandler(BaseCallbackHandler):
 </speak>"""
 
 
-
-            self.speak_ssml_async(ssml_text)
+            if self.run_place !="local":
+                self.speak_streamlit_cloud(ssml_text)
+            else:
+                self.speak_ssml_async(ssml_text)
             self.new_sentence = ""
 
     def on_llm_end(self, response, **kwargs) -> None:
@@ -70,3 +79,15 @@ class StreamSpeakHandler(BaseCallbackHandler):
         speech_synthesis_result = self.speech_synthesizer.speak_ssml_async(text).get()
         if speech_synthesis_result.reason != speechsdk.ResultReason.SynthesizingAudioCompleted:
             print(f'Error synthesizing speech: {speech_synthesis_result.reason}')
+    def speak_streamlit_cloud(self,text):
+        speech_synthesis_result = self.speech_synthesizer.speak_ssml_async(text).get()
+        if speech_synthesis_result.reason != speechsdk.ResultReason.SynthesizingAudioCompleted:
+            print(f'Error synthesizing speech: {speech_synthesis_result.reason}')
+        else:
+            audio_stream = speech_synthesis_result.audio_data
+            audio_base64 = base64.b64encode(audio_stream).decode('utf-8')
+            audio_tag = f'<audio autoplay="true" src="data:audio/wav;base64,{audio_base64}">'
+            self.container.markdown(audio_tag, unsafe_allow_html=True)
+            number_of_seconds = speech_synthesis_result.audio_duration.seconds
+            time.sleep(number_of_seconds)
+            
