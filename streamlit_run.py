@@ -10,7 +10,7 @@ init_sessions()
 # layout 
 header = st.container()
 # settings = st.sidebar.container()
-settings=st.expander("虎符相印")
+settings=st.expander("虎符")
 
 chat_box=st.container()
 

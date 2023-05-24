@@ -38,23 +38,35 @@ def set_settings(c):
 
     st.session_state["answer_length"] = answer_length
     st.session_state["temperature"] = temperature
-    speech_key=c.text_input("主公请输入虎符(Azure Speech Key)", value="", type="password")
-    speech_region=c.text_input("主公请输入虎符(Azure Speech Region)", value="westus", type="password")
-
-    stream_display_handler = StreamDisplayHandler(
-        st.session_state["stream_box"], display_method='markdown')
-    
+    speech_key=c.text_input("主公请输入虎符(Azure Speech Key)", 
+                            value="",  type="password")
+    speech_region=c.text_input("主公请输入虎符(Azure Speech Region)", 
+                               value="westus", type="password")
     speak_choose=c.selectbox("语音",options=["关闭","开启"],index=0)
-    if speak_choose=="开启" and len(speech_key)>0 and len(speech_region)>0:
-        os.environ['SPEECH_KEY']=speech_key
-        os.environ['SPEECH_REGION']=speech_region
-        stream_speak_handler = StreamSpeakHandler(recognition="zh-CN", synthesis="zh-CN-YunjianNeural",)
-        stream_handler=[stream_display_handler,stream_speak_handler]
-    else:
-        stream_handler=[stream_display_handler]
+
+    make_model_button = c.button("打造虎符")
 
     if openai_key:
         os.environ["OPENAI_API_KEY"] = openai_key
+    if speech_key:
+        os.environ['SPEECH_KEY']=speech_key
+    if speech_region:
+        os.environ['SPEECH_REGION']=speech_region
+
+    if make_model_button and openai_key:
+        if speak_choose=="开启" and len(speech_key)>0 and len(speech_region)>0:
+            
+            stream_display_handler = StreamDisplayHandler(
+            st.session_state["stream_box"], display_method='markdown')
+
+            stream_speak_handler = StreamSpeakHandler(recognition="zh-CN", synthesis="zh-CN-YunjianNeural",)
+
+            stream_handler=[stream_display_handler,stream_speak_handler]
+        elif speak_choose=="开启":
+            c.error("请输入语音虎符")
+        else:
+            stream_handler=[stream_display_handler]
+        
         llm=ChatOpenAI(
             model_name=st.session_state["model"],
             temperature=st.session_state["temperature"],
@@ -63,8 +75,20 @@ def set_settings(c):
         individual_chain, summary_chain=init_chain(llm)
         st.session_state["individual_chain"]=individual_chain
         st.session_state["summary_chain"]=summary_chain
-    else:
-        st.error("请输入OpenAI API Key")
+        c.success("虎符打造成功")
+
+    # if openai_key:
+    #     os.environ["OPENAI_API_KEY"] = openai_key
+    #     llm=ChatOpenAI(
+    #         model_name=st.session_state["model"],
+    #         temperature=st.session_state["temperature"],
+    #         streaming=True, callbacks=stream_handler
+    #         )
+    #     individual_chain, summary_chain=init_chain(llm)
+    #     st.session_state["individual_chain"]=individual_chain
+    #     st.session_state["summary_chain"]=summary_chain
+    # else:
+    #     st.error("请输入OpenAI API Key")
     
 def set_header(c):
     c.markdown("#### 军师联盟")
