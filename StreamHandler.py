@@ -24,26 +24,26 @@ class StreamDisplayHandler(BaseCallbackHandler):
 
 
 class StreamSpeakHandler(BaseCallbackHandler):
-    def __init__(self, recognition="zh-CN", synthesis="zh-CN-XiaoxiaoNeural"):
+    def __init__(self, synthesis="zh-CN-XiaoxiaoNeural"):
         self.new_sentence = ""
         # Initialize the speech synthesizer
-        self.speech_recognizer, self.speech_synthesizer = self.settings(recognition, synthesis)
+        self.speech_synthesizer = self.settings(synthesis)
 
-    def settings(self, recognition, synthesis):
+    def settings(self, synthesis):
         speech_config = speechsdk.SpeechConfig(
             subscription=os.environ.get('SPEECH_KEY'), 
             region=os.environ.get('SPEECH_REGION')
         )
         audio_output_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
-        audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
+        # audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
 
-        speech_config.speech_recognition_language=recognition
-        speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+        # speech_config.speech_recognition_language=recognition
+        # speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
         speech_config.speech_synthesis_voice_name=synthesis
 
         speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_output_config)
-        return speech_recognizer, speech_synthesizer
+        return speech_synthesizer
 
     def on_llm_new_token(self, token: str, **kwargs) -> None:
         self.new_sentence += token

@@ -58,7 +58,7 @@ def set_settings(c):
             st.session_state["stream_box"], display_method='markdown')
 
         if speak_choose=="开启" and len(speech_key)>0 and len(speech_region)>0:
-            stream_speak_handler = StreamSpeakHandler(recognition="zh-CN", synthesis="zh-CN-YunjianNeural",)
+            stream_speak_handler = StreamSpeakHandler(synthesis="zh-CN-YunjianNeural",)
 
             stream_handler=[stream_display_handler,stream_speak_handler]
         elif speak_choose=="开启":
