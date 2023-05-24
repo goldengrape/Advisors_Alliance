@@ -54,11 +54,10 @@ def set_settings(c):
         os.environ['SPEECH_REGION']=speech_region
 
     if make_model_button and openai_key:
-        if speak_choose=="开启" and len(speech_key)>0 and len(speech_region)>0:
-            
-            stream_display_handler = StreamDisplayHandler(
+        stream_display_handler = StreamDisplayHandler(
             st.session_state["stream_box"], display_method='markdown')
 
+        if speak_choose=="开启" and len(speech_key)>0 and len(speech_region)>0:
             stream_speak_handler = StreamSpeakHandler(recognition="zh-CN", synthesis="zh-CN-YunjianNeural",)
 
             stream_handler=[stream_display_handler,stream_speak_handler]
