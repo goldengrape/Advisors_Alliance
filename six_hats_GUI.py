@@ -46,7 +46,7 @@ def set_settings(c):
     if speak_choose=="开启":
         speech_key=c.text_input("主公请输入虎符(Azure Speech Key)", value="", type="password")
         speech_region=c.text_input("主公请输入虎符(Azure Speech Region)", value="", type="password")
-        if speech_key and speech_region:
+        if len(speech_key)>0 and len(speech_region)>0:
             os.environ['SPEECH_KEY']=speech_key
             os.environ['SPEECH_REGION']=speech_region
             stream_speak_handler = StreamSpeakHandler(recognition="zh-CN", synthesis="zh-CN-YunjianNeural",)
