@@ -41,12 +41,16 @@ def set_settings(c):
     
     stream_display_handler = StreamDisplayHandler(
         st.session_state["stream_box"], display_method='markdown')
-    stream_speak_handler = StreamSpeakHandler(
-        recognition="zh-CN", synthesis="zh-CN-YunjianNeural",
-    )
+    
     speak_choose=c.selectbox("语音",options=["关闭","开启"],index=0)
     if speak_choose=="开启":
-        stream_handler=[stream_display_handler,stream_speak_handler]
+        speech_key=c.text_input("主公请输入虎符(Azure Speech Key)", value="", type="password")
+        speech_region=c.text_input("主公请输入虎符(Azure Speech Region)", value="", type="password")
+        if speech_key and speech_region:
+            os.environ['SPEECH_KEY']=speech_key
+            os.environ['SPEECH_REGION']=speech_region
+            stream_speak_handler = StreamSpeakHandler(recognition="zh-CN", synthesis="zh-CN-YunjianNeural",)
+            stream_handler=[stream_display_handler,stream_speak_handler]
     else:
         stream_handler=[stream_display_handler]
 
