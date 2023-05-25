@@ -7,3 +7,4 @@ plotly
 scipy
 scikit-learn
 azure-cognitiveservices-speech
+streamlit-audiorecorder
