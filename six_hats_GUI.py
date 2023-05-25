@@ -1,12 +1,14 @@
 import streamlit as st 
 from six_hats_backend import (
-    init_chain, init_advisor,
+    init_chain, init_advisor, transcribe
     )
 import os 
 from langchain.chat_models import ChatOpenAI
 # from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import HumanMessage
 from StreamHandler import StreamDisplayHandler, StreamSpeakHandler
+from audiorecorder import audiorecorder
+
 
 
 def init_session_state(key,value):
@@ -147,8 +149,13 @@ def get_advice(img_container,markdown_container):
     markdown_container.markdown(f"{res}")
     return
 
-def set_chatbox(c):
-    human_input=c.text_area("主公请提问", value="")
+def set_chatbox(c,audio):
+    transcript=""
+    if len(audio) > 0:
+        with st.spinner("识别中..."):
+            transcript = transcribe(audio.tobytes())
+
+    human_input=c.text_area("主公请提问", value=transcript)
     ask_button=c.button("提问")
     col1,col2=c.columns([1,6])
     current_img=col1.empty()

@@ -147,22 +147,17 @@ def get_advice(human_input,advisor_list,individual_chain,sum_chain):
     advice_list.append(res)
     return advice_list
 
+import tempfile
+from audiorecorder import audiorecorder
+import openai
 
-
-# from langchain.callbacks.base import BaseCallbackHandler
-# class StreamHandler(BaseCallbackHandler):
-#     def __init__(self, container, initial_text="", display_method='markdown'):
-#         self.container = container
-#         self.text = initial_text
-#         self.display_method = display_method
-
-#     def on_llm_new_token(self, token: str, **kwargs) -> None:
-#         self.text += token
-#         display_function = getattr(self.container, self.display_method, None)
-#         if display_function is not None:
-#             display_function(self.text)
-#         else:
-#             raise ValueError(f"Invalid display_method: {self.display_method}")
-#     def on_llm_end(self, response, **kwargs: Any) -> Any:
-#         self.text=""
-    
+def transcribe(audio_bytes):
+    with tempfile.NamedTemporaryFile(suffix=".wav") as tmpfile:
+        tmpfile.write(audio_bytes)
+        tmpfile.seek(0)
+        return openai.Audio.transcribe(
+            "whisper-1",
+            tmpfile,
+            temperature=0.2,
+            prompt="这是中文语音输入",
+        )["text"]
